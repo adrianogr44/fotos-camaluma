@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Identificar fotos · Camaluma</title>
+<style>
+  :root { --verde: #63795A; --tinta: #35372e; --fundo: #F4F1E9; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--fundo); margin: 0; padding: 16px 14px 110px; color: var(--tinta); }
+  h1 { color: var(--verde); font-size: 1.35rem; margin: 4px 0 2px; }
+  .intro { margin: 0 0 18px; color: #6b6d62; font-size: .95rem; }
+  h2 { font-size: 1.05rem; margin: 26px 0 10px; line-height: 1.35; background: var(--verde); color: #fff; padding: 10px 12px; border-radius: 10px; }
+  .grade { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .op { border: 4px solid transparent; border-radius: 14px; background: #fff; overflow: hidden; cursor: pointer; position: relative; }
+  .op img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; pointer-events: none; }
+  .op span { display: block; text-align: center; font-weight: 700; padding: 8px 4px; font-size: .95rem; }
+  .op--nda { grid-column: 1 / -1; padding: 16px; text-align: center; color: #999; font-weight: 700; }
+  .op.sel { border-color: var(--verde); }
+  .op.sel::after { content: '✓'; position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; border-radius: 50%; background: var(--verde); color: #fff; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .rodape { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); background: #fffdf8; border-top: 1px solid #ddd8ca; }
+  button { width: 100%; background: var(--verde); color: #fff; border: 0; border-radius: 12px; padding: 16px; font-size: 1.05rem; font-weight: 800; cursor: pointer; }
+  button:disabled { opacity: .35; }
+  .conta { text-align: center; font-size: .8rem; color: #6b6d62; margin: 0 0 6px; }
+  @media (min-width: 720px) { body { max-width: 900px; margin: auto; } .grade { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+<h1>Oi Gabriela! 👋</h1>
+<p class="intro">Toca na foto certa de cada pergunta. No final, o botão manda as respostas prontinhas pelo WhatsApp.</p>
+
+<h2>1️⃣ BABÃO — qual é a <u>Branco Bege Xadrez</u>?</h2>
+<div class="grade" data-grupo="Babão Branco Bege Xadrez" data-fotos="0028,0030,0034,0035,9957,9988"></div>
+
+<h2>2️⃣ TOALHA CAPUZ — qual é a <u>Branca Bege Xadrez</u>?</h2>
+<div class="grade" data-grupo="Capuz Branca Bege Xadrez" data-fotos="0380,0382,0386,0388,0390,0392,0394"></div>
+
+<h2>3️⃣ TOALHA CAPUZ — qual é a <u>Branca Bege Sol</u>?</h2>
+<div class="grade" data-grupo="Capuz Branca Bege Sol" data-fotos="0380,0382,0386,0388,0390,0392,0394"></div>
+
+<div class="rodape">
+  <p class="conta"><span id="conta">0</span>/3 respondidas</p>
+  <button id="enviar" disabled>Enviar respostas no WhatsApp</button>
+</div>
+
+<script>
+  const escolhas = {};
+  document.querySelectorAll('.grade').forEach(g => {
+    g.innerHTML = g.dataset.fotos.split(',').map(n =>
+      '<div class="op" data-num="' + n + '"><img src="img/' + n + '.jpg" loading="lazy"><span>foto ' + n + '</span></div>'
+    ).join('') + '<div class="op op--nda" data-num="nenhuma dessas">nenhuma dessas</div>';
+    g.addEventListener('click', e => {
+      const op = e.target.closest('.op'); if (!op) return;
+      g.querySelectorAll('.op').forEach(o => o.classList.remove('sel'));
+      op.classList.add('sel');
+      escolhas[g.dataset.grupo] = op.dataset.num;
+      const total = Object.keys(escolhas).length;
+      document.getElementById('conta').textContent = total;
+      document.getElementById('enviar').disabled = total < 3;
+    });
+  });
+  document.getElementById('enviar').addEventListener('click', () => {
+    const texto = 'Fotos identificadas:\n' + Object.entries(escolhas).map(([g, n]) => '• ' + g + ': foto ' + n).join('\n');
+    location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(texto);
+  });
+</script>
+</body>
+</html>
